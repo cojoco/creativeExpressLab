@@ -35,7 +35,7 @@ function userFetcher ($http) {
   }
 }
 
-function mainCtrl ($scope, movieFetcher, userFetcher) {
+function mainCtrl ($scope, $http, movieFetcher, userFetcher) {
   $scope.movies = [];
   $scope.user = null;
 
@@ -52,6 +52,13 @@ function mainCtrl ($scope, movieFetcher, userFetcher) {
     var newComment = {text:comment, user:$scope.user};
     $scope.movies[index].comments.push(newComment);
     console.log($scope.movies[index].comments);
-    //TODO: Add comment to MongoDB
+    var respObj = {'movieTitle':$scope.movies[index].name, 'commentText':comment, 'user':$scope.user};
+    console.log(JSON.stringify(respObj));
+    $http({
+      method: 'POST',
+      url: 'addComment',
+      data: JSON.stringify(respObj),
+      headers: {'Content-Type': 'application/json'}
+    });
   }
 }

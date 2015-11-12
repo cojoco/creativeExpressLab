@@ -1,4 +1,5 @@
 var express = require('express');
+var bodyParser = require('body-parser');
 var router = express.Router();
 var MongoClient = require('mongodb').MongoClient;
 
@@ -13,24 +14,21 @@ router.get('/home', ensureAuthenticated, function(req, res) {
 });
 
 router.post('/addComment', ensureAuthenticated, function(req, res) {
-  var jsonData = "";
-  req.on('data', function(chunk) {
-    jsonData += chunk;
-  });
-  req.on('end', function() {
-    var reqObj = JSON.parse(jsonData);
-    MongoClient.connect("mongodb://localhost/creativeExpress", function(err, db) {
-      if(err) throw err;
-      db.collection('movies')
-        .update(
-          {name:reqObj.movieTitle},/*This should find the movie object by title*/
-          {$push: { comments: {text:reqObj.commentText,user:reqObj.user}}},/*This should define what to push in the document's array*/
-          function(err, records) {
-            res.writeHead(200);
-            res.end("");
-        });
-    }); 
-  });
+  console.log("entered POST addComment route");
+  console.log(req.body);
+  var reqObj = req.body;
+  console.log(reqObj);
+  MongoClient.connect("mongodb://localhost/creativeExpress", function(err, db) {
+    if(err) throw err;
+    db.collection('movies')
+      .update(
+        {name:reqObj.movieTitle},/*This should find the movie object by title*/
+        {$push: { comments: {text:reqObj.commentText,user:reqObj.user}}},/*This should define what to push in the document's array*/
+        function(err, records) {
+          res.writeHead(200);
+          res.end("");
+      });
+  }); 
 });
 
 function ensureAuthenticated(req, res, next) {
@@ -38,4 +36,5 @@ function ensureAuthenticated(req, res, next) {
 res.redirect('/')
 }
 
+var jsonParser = bodyParser.json();
 module.exports = router;
